@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sewer System · Doodoodoku</title>
+<meta name="description" content="Someone wants to flush you into their Doodoodoku sewer system.">
+<style>
+  :root { color-scheme: light dark; --bg: #f6f4ef; --fg: #2b211a; --accent: #8c5730; --card: #fffdf8; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1d1915; --fg: #efe8df; --accent: #d39a6a; --card: #2a241e; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  main { max-width: 480px; margin: 0 auto; padding: 48px 16px 64px; text-align: center; }
+  .poo { font-size: 72px; line-height: 1; }
+  h1 { color: var(--accent); margin: 16px 0 8px; font-size: 1.6em; }
+  .card { background: var(--card); border-radius: 20px; padding: 24px 16px; margin: 24px 0; }
+  .count { font-size: 1.4em; font-weight: 800; font-variant-numeric: tabular-nums; margin: 4px 0; }
+  a.button { display: block; margin: 12px 0; padding: 14px; border-radius: 14px; font-weight: 700; text-decoration: none; }
+  a.primary { background: var(--accent); color: #fff; }
+  a.secondary { border: 2px solid var(--accent); color: var(--accent); }
+  .small { opacity: 0.7; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<main>
+  <div class="poo" aria-hidden="true">🚽</div>
+  <h1 id="headline">A flusher wants to flush you into their sewer system.</h1>
+  <div class="card">
+    <div>Doodoodoku's Sewer System is the Poo-to-Poo Network. Scan someone's code and you collect them, plus everyone they've collected.</div>
+    <div class="count" id="count" hidden></div>
+  </div>
+  <a class="button primary" id="open" href="doodoodoku://pipe">Open in Doodoodoku</a>
+  <a class="button secondary" href="https://apps.apple.com/app/id6828952287">Get Doodoodoku</a>
+  <p class="small">Already have the app? “Open in Doodoodoku” connects your pipes. New here? Get the app, then come back and tap Open.</p>
+  <p class="small"><a href="index.html">About Doodoodoku</a> · <a href="privacy.html">Privacy</a></p>
+</main>
+<script>
+  // Reads the code from this link's #fragment, which browsers never send to the server. Nothing is sent anywhere,
+  // nothing is stored and nothing is loaded from anyone else. The app checks the code's signature; this page
+  // only reads the sender's rank and count to say hello.
+  (function () {
+    var payload = window.location.hash.slice(1);
+    if (!/^[A-Za-z0-9_-]{20,4000}$/.test(payload)) { return; }
+    document.getElementById("open").href = "doodoodoku://pipe#" + payload;
+
+    var ranks = ["Plunger Rookie", "Wax Ring Recruit", "Drain Snake", "Lateral Line", "Tosher", "Gong Farmer",
+                 "Honey Wagon Driver", "Head Flusher", "Grand Interceptor", "Lord of the Lagoon"];
+    try {
+      var base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+      while (base64.length % 4) { base64 += "="; }
+      var bytes = Uint8Array.from(atob(base64), function (c) { return c.charCodeAt(0); });
+      if (bytes[0] !== 1) { return; } // A newer format: the generic greeting is fine.
+      var at = 3 + 6 + 8 + ((bytes[1] & 2) ? 8 : 0) + 4; // version, flags, source, sender, nonce, reply-to, date
+      var count = ((bytes[at] << 24) >>> 0) + (bytes[at + 1] << 16) + (bytes[at + 2] << 8) + bytes[at + 3];
+      var rank = ranks[bytes[at + 6]];
+      if (!rank) { return; }
+      var article = /^[AEIOU]/.test(rank) ? "An " : "A ";
+      document.getElementById("headline").textContent = article + rank + " wants to flush you into their sewer system.";
+      var counter = document.getElementById("count");
+      counter.textContent = (count > 150 ? "≈ " : "") + count.toLocaleString() + (count === 1 ? " flusher" : " flushers") + " in their pipes";
+      counter.hidden = false;
+    } catch (e) {
+      // A garbled code still gets the generic greeting and the buttons.
+    }
+  })();
+</script>
+</body>
+</html>
