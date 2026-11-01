@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["763NC54GV7.com.andrewhouston.PooDoku"],
+        "components": [
+          { "/": "/pipe", "comment": "Stink Links" },
+          { "/": "/pipe.html", "comment": "Stink Links" },
+          { "/": "/dare.html", "comment": "Dares" }
+        ]
+      }
+    ]
+  }
+}
